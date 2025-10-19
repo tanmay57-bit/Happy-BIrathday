@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
+h1{
+    document.addEventListener('DOMContentLoaded', () => {
     const button = document.getElementById('orderNowButton');
     const heartContainer = document.getElementById('heart-container'); // Container for hearts
 
@@ -38,3 +39,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+        }
