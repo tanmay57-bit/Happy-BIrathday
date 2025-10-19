@@ -1,50 +1,113 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>HBD Dumbo</title>	    
-    <link type="text/css" rel="stylesheet" href="./file/default.css">
-    <script type="text/javascript" src="./file/jquery.min.js"></script>
-    <script type="text/javascript" src="./file/jscex.min.js"></script>
-    <script type="text/javascript" src="./file/jscex-parser.js"></script>
-    <script type="text/javascript" src="./file/jscex-jit.js"></script>
-    <script type="text/javascript" src="./file/jscex-builderbase.min.js"></script>
-    <script type="text/javascript" src="./file/jscex-async.min.js"></script>
-    <script type="text/javascript" src="./file/jscex-async-powerpack.min.js"></script>
-    <script type="text/javascript" src="./file/functions.js" charset="utf-8"></script>
-    <script type="text/javascript" src="./file/love.js" charset="utf-8"></script>
-    <script>
-        function playAudio() {
-            var audio = document.getElementById("myAudio");
-            audio.play();
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Dumbo!</title>
+    
+    <link rel="stylesheet" href="./file/default.css">
+
+    <script src="./file/jquery.min.js"></script>
+    
+    <script src="./file/jscex.min.js"></script>
+    <script src="./file/jscex-parser.js"></script>
+    <script src="./file/jscex-jit.js"></script>
+    <script src="./file/jscex-builderbase.min.js"></script>
+    <script src="./file/jscex-async.min.js"></script>
+    <script src="./file/jscex-async-powerpack.min.js"></script>
+    <script src="./file/functions.js"></script>
+    <script src="./file/love.js"></script>
+    
+    <style>
+        /* Modern audio controls visibility if you need them for debugging */
+        #myAudio {
+            /* display: none; /* Hide the audio player */
         }
-    </script>
+
+        /* Basic styling for the surprise button's outer div */
+        .surprise-container {
+            position: fixed; /* Keep it on the screen */
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+
+        .myBtn {
+            padding: 10px 20px;
+            border: 2px solid #ccc; /* Simple border */
+            border-radius: 5px;
+            text-decoration: none;
+            color: #333;
+            background-color: #f0f0f0;
+            transition: all 0.3s ease;
+            font-family: sans-serif; /* Ensure the text is readable */
+            font-size: 25px !important; /* Use !important if external styles are fighting */
+        }
+        
+        .myBtn:hover {
+            background-color: #ddd;
+            color: #000;
+        }
+    </style>
 </head>
 <body>
     <div id="main">
-        <div id="error"><a href="http://www.google.cn/chrome/intl/zh-CN/landing_chrome.html?hl=zh-CN&brand=CHMI">Chrome</a> (<a href="http://firefox.com.cn/download/">Firefox</a>)</div>
-        <audio autoplay="autoplay" height="100" width="100" id="myAudio">
-            <source src="Happy_Birthday_Song_Remix_For_Your_Special_Day_💎_Happy_Birthday_To_You!!!(256k).mp3" type="audio/mp3" />
-            <embed height="100" width="100" src="aud.mp3" />
+        <div id="error" style="display:none;">Please use a modern browser to view this.</div>
+
+        <audio id="myAudio" loop>
+            <source src="Happy_Birthday_Song_Remix_For_Your_Special_Day_💎_Happy_Birthday_To_You!!!(256k).mp3" type="audio/mp3">
+            Your browser does not support the audio element.
         </audio>
+        
         <div id="wrap">
             <div id="text">
                 <div id="code">
-                    <span class="say">Hithe me ek note takel </span><br>
-                    <span class="say">ChatGPT cha help ni</span><br>
+                    <span class="say">Happy Birthday Dumbo 💖</span><br>
+                    <span class="say">Time to eat cake, drink the fancy stuff, and demand everyone treat you like the queen you are👸</span><br>
+                    <span class="say">I'm so grateful to have you in my life💫</span><br>
+                    <span class="say">I Hope your day is filled with all the fun and smiles❣️ 🧿 🎈</span><br>
+                    <span class="say">Hope u have a great day today 💫</span><br>
+                    <span class="say">I am sorry for my all mistakes which I had done in past😐</span><br>
+                    <span class="say">But I promise I will not repeat my mistakes again😄</span><br>
                 </div>
             </div>
+            
             <div id="clock-box">
-                <span id="clock">577 days 0 hours 0 minutes 0 seconds</span><br>
+                <span id="clock">577 days 0 hours 0 minutes 0 seconds</span>
             </div>
+            
             <canvas id="canvas" width="1100" height="680"></canvas>
         </div>
     </div>
 
+    <div class="surprise-container">
+        <a href="https://happy-birathay-dumbo.vercel.app/" target="_blank" class="myBtn">
+            Click here for Surprise
+        </a>
+    </div>
+
     <script>
+    /* * NOTE: I removed the separate playAudio() function because the one inside
+     * the canvas.click() handler is already doing the work!
+     * * The canvas click handler:
+     * canvas.click(function(e) {
+     * playAudio(); // This line is what I would usually remove, but since it's an audio fix, I'll keep it.
+     * ...
+     * });
+     * * If you want to force the audio to play on page load (which is often blocked by browsers),
+     * you can try:
+     * document.addEventListener('DOMContentLoaded', () => {
+     * document.getElementById('myAudio').play().catch(e => console.log("Audio autoplay prevented."));
+     * });
+     * * ...but the user-interaction (click) method is the most reliable way to start the audio.
+     */
+
+    // Keeping your original script for the animation logic
     (function() {
         var canvas = $('#canvas');
-		
+        
+        // This check is a bit redundant on modern browsers, but harmless
         if (!canvas[0].getContext) {
             $("#error").show();
             return false;
@@ -56,7 +119,8 @@
         canvas.attr("height", height);
 
         var opts = {
-            seed: {
+            // ... (options are unchanged) ...
+             seed: {
                 x: width / 2 - 20,
                 color: "rgb(190, 26, 37)",
                 scale: 2
@@ -95,9 +159,17 @@
         var seed = tree.seed;
         var foot = tree.footer;
         var hold = 1;
+        
+        // **Audio Fix:** Get the audio element once
+        var audio = document.getElementById("myAudio");
 
         canvas.click(function(e) {
-            playAudio();
+            // **Audio Fix:** Use the native play() method
+            audio.play().catch(error => {
+                console.error("Audio playback failed:", error);
+                // Can add a fallback message here
+            });
+            
             var offset = canvas.offset(), x, y;
             x = e.pageX - offset.left;
             y = e.pageY - offset.top;
@@ -106,7 +178,7 @@
                 canvas.unbind("click");
                 canvas.unbind("mousemove");
                 canvas.removeClass('hand');
-            }
+            }		
         }).mousemove(function(e) {
             var offset = canvas.offset(), x, y;
             x = e.pageX - offset.left;
@@ -114,6 +186,7 @@
             canvas.toggleClass('hand', seed.hover(x, y));
         });
 
+        // The Jscex (Async/Await) logic is complex but necessary for the animation flow, so it's kept as-is.
         var seedAnimate = eval(Jscex.compile("async", function () {
             seed.draw();
             while (hold) {
@@ -174,24 +247,6 @@
         runAsync().start();
     })();
 
-	
     </script>
 </body>
 </html>
-
-<body>
-	<h1>
-		<a target="_blank"
-   class="btn myBtn btn-md order-now-btn wow zoomInUp"
-   data-wow-duration="1.5s"
-   data-wow-delay="1s"
-   id="orderNowButton"> Order now 
-	</a>
-		
-	</h1></body>
-
-<div id="heart-container"></div>
-</a>
-</div>
-
-
