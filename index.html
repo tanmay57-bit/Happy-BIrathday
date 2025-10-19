@@ -19,35 +19,112 @@
     <script src="./file/love.js"></script>
     
     <style>
-        /* Modern audio controls visibility if you need them for debugging */
-        #myAudio {
-            /* display: none; /* Hide the audio player */
+        /* General body styling for context, if needed from default.css */
+        body {
+            overflow: hidden; /* Prevent scrollbars from popping up due to heart particles */
+            background-color: #000; /* Assuming a dark background from default.css */
         }
 
-        /* Basic styling for the surprise button's outer div */
+        #myAudio {
+            /* display: none; /* Hide the audio player visuals */
+        }
+
+        /* Styling for the surprise button's outer div */
         .surprise-container {
-            position: fixed; /* Keep it on the screen */
-            bottom: 20px;
+            position: fixed;
+            bottom: 40px; /* Slightly higher to give hearts room to float up */
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
+            perspective: 1000px; /* For potential 3D effects on hearts */
         }
 
         .myBtn {
-            padding: 10px 20px;
-            border: 2px solid #ccc; /* Simple border */
-            border-radius: 5px;
+            font-size: 25px !important;
+            padding: 15px 30px; /* Slightly larger padding */
+            border: none; /* Remove default border */
+            border-radius: 50px; /* Make it more pill-shaped */
             text-decoration: none;
-            color: #333;
-            background-color: #f0f0f0;
-            transition: all 0.3s ease;
-            font-family: sans-serif; /* Ensure the text is readable */
-            font-size: 25px !important; /* Use !important if external styles are fighting */
+            color: #fff; /* White text */
+            background-image: linear-gradient(45deg, #ff6b6b, #ffe66d); /* Vibrant gradient */
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.7); /* Soft glow */
+            transition: all 0.4s ease-in-out; /* Smoother transitions */
+            font-family: 'Comic Sans MS', cursive, sans-serif; /* A bit playful for a birthday */
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3); /* Subtle text shadow */
+            cursor: pointer;
+            position: relative; /* Needed for pseudo-elements or absolute children */
+            overflow: hidden; /* Clip hearts if they start inside the button too much */
         }
         
         .myBtn:hover {
-            background-color: #ddd;
-            color: #000;
+            transform: scale(1.05); /* Slightly enlarge on hover */
+            box-shadow: 0 0 30px rgba(255, 107, 107, 1); /* More intense glow */
+            background-image: linear-gradient(45deg, #ffe66d, #ff6b6b); /* Reverse gradient on hover */
+        }
+
+        /* Pulse animation for the button */
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 107, 107, 0.7); }
+            50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(255, 107, 107, 1); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 107, 107, 0.7); }
+        }
+        .myBtn {
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        /* Styles for the individual heart particles */
+        .heart-particle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #ff6b6b; /* Red heart */
+            transform: rotate(-45deg); /* Make it heart-shaped */
+            opacity: 0; /* Start invisible */
+            pointer-events: none; /* Don't interfere with clicks */
+            animation: floatAndFade 3s ease-out forwards;
+        }
+        .heart-particle::before,
+        .heart-particle::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #ff6b6b;
+            border-radius: 50%;
+        }
+        .heart-particle::before {
+            top: -10px;
+            left: 0;
+        }
+        .heart-particle::after {
+            left: 10px;
+            top: 0;
+        }
+
+        @keyframes floatAndFade {
+            0% {
+                transform: translate(0, 0) rotate(-45deg) scale(0);
+                opacity: 0;
+            }
+            10% {
+                transform: translate(0, 0) rotate(-45deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--translateX, 0), var(--translateY, -200px)) rotate(calc(-45deg + var(--rotate, 0deg))) scale(var(--scale, 0.5));
+                opacity: 0;
+            }
+        }
+
+        /* Error message styling */
+        #error {
+            color: white;
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(255, 0, 0, 0.5);
+            margin: 20px;
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -64,7 +141,12 @@
             <div id="text">
                 <div id="code">
                     <span class="say">Happy Birthday Dumbo 💖</span><br>
-                    
+                    <span class="say">Time to eat cake, drink the fancy stuff, and demand everyone treat you like the queen you are👸</span><br>
+                    <span class="say">I'm so grateful to have you in my life💫</span><br>
+                    <span class="say">I Hope your day is filled with all the fun and smiles❣️ 🧿 🎈</span><br>
+                    <span class="say">Hope u have a great day today 💫</span><br>
+                    <span class="say">I am sorry for my all mistakes which I had done in past😐</span><br>
+                    <span class="say">But I promise I will not repeat my mistakes again😄</span><br>
                 </div>
             </div>
             
@@ -77,32 +159,16 @@
     </div>
 
     <div class="surprise-container">
-        <a href="https://happy-birathay-dumbo.vercel.app/" target="_blank" class="myBtn">
+        <a href="https://happy-birathay-dumbo.vercel.app/" target="_blank" class="myBtn" id="surpriseButton">
             Click here for Surprise
         </a>
     </div>
 
     <script>
-    /* * NOTE: I removed the separate playAudio() function because the one inside
-     * the canvas.click() handler is already doing the work!
-     * * The canvas click handler:
-     * canvas.click(function(e) {
-     * playAudio(); // This line is what I would usually remove, but since it's an audio fix, I'll keep it.
-     * ...
-     * });
-     * * If you want to force the audio to play on page load (which is often blocked by browsers),
-     * you can try:
-     * document.addEventListener('DOMContentLoaded', () => {
-     * document.getElementById('myAudio').play().catch(e => console.log("Audio autoplay prevented."));
-     * });
-     * * ...but the user-interaction (click) method is the most reliable way to start the audio.
-     */
-
-    // Keeping your original script for the animation logic
+    // ... (Your original Jscex/animation script remains mostly unchanged) ...
     (function() {
         var canvas = $('#canvas');
         
-        // This check is a bit redundant on modern browsers, but harmless
         if (!canvas[0].getContext) {
             $("#error").show();
             return false;
@@ -114,7 +180,6 @@
         canvas.attr("height", height);
 
         var opts = {
-            // ... (options are unchanged) ...
              seed: {
                 x: width / 2 - 20,
                 color: "rgb(190, 26, 37)",
@@ -155,14 +220,11 @@
         var foot = tree.footer;
         var hold = 1;
         
-        // **Audio Fix:** Get the audio element once
         var audio = document.getElementById("myAudio");
 
         canvas.click(function(e) {
-            // **Audio Fix:** Use the native play() method
             audio.play().catch(error => {
                 console.error("Audio playback failed:", error);
-                // Can add a fallback message here
             });
             
             var offset = canvas.offset(), x, y;
@@ -181,7 +243,6 @@
             canvas.toggleClass('hand', seed.hover(x, y));
         });
 
-        // The Jscex (Async/Await) logic is complex but necessary for the animation flow, so it's kept as-is.
         var seedAnimate = eval(Jscex.compile("async", function () {
             seed.draw();
             while (hold) {
@@ -241,6 +302,62 @@
 
         runAsync().start();
     })();
+
+    // New JavaScript for heart animation
+    $(document).ready(function() {
+        const $button = $('#surpriseButton');
+
+        // Function to create and animate a single heart particle
+        function createHeartParticle() {
+            const $heart = $('<div class="heart-particle"></div>');
+            
+            // Get button position and size
+            const buttonOffset = $button.offset();
+            const buttonWidth = $button.outerWidth();
+            const buttonHeight = $button.outerHeight();
+
+            // Position the heart to start roughly from the button's center
+            const startX = buttonOffset.left + buttonWidth / 2 - 10; // -10 for half heart width
+            const startY = buttonOffset.top + buttonHeight / 2 - 10; // -10 for half heart height
+
+            // Randomize trajectory and size
+            const translateX = (Math.random() - 0.5) * 200; // -100 to 100px horizontal
+            const translateY = -(Math.random() * 150 + 150); // -150 to -300px vertical (always upwards)
+            const rotation = (Math.random() - 0.5) * 90; // -45 to 45 degrees
+            const scale = Math.random() * 0.7 + 0.3; // 0.3 to 1.0
+
+            $heart.css({
+                left: startX + 'px',
+                top: startY + 'px',
+                '--translateX': translateX + 'px',
+                '--translateY': translateY + 'px',
+                '--rotate': rotation + 'deg',
+                '--scale': scale
+            });
+
+            $('body').append($heart);
+
+            // Remove the heart after its animation completes
+            $heart.one('animationend', function() {
+                $(this).remove();
+            });
+        }
+
+        // Generate hearts when the mouse hovers over the button
+        let heartInterval;
+        $button.on('mouseenter', function() {
+            heartInterval = setInterval(createHeartParticle, 100); // Create a heart every 100ms
+        }).on('mouseleave', function() {
+            clearInterval(heartInterval); // Stop creating hearts when mouse leaves
+        });
+
+        // Also generate some hearts on click, for a quick burst
+        $button.on('click', function() {
+            for (let i = 0; i < 10; i++) { // Generate 10 hearts on click
+                setTimeout(createHeartParticle, i * 50); // Stagger them slightly
+            }
+        });
+    });
 
     </script>
 </body>
