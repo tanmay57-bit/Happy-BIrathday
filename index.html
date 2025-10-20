@@ -3,62 +3,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Order Button & Screen-Floating Heart Animation</title>
+    <title>Happy Birthday Dumbo!</title>
+    
+    <link rel="stylesheet" href="./file/default.css">
+
+    <script src="./file/jquery.min.js"></script>
+    
+    <script src="./file/jscex.min.js"></script>
+    <script src="./file/jscex-parser.js"></script>
+    <script src="./file/jscex-jit.js"></script>
+    <script src="./file/jscex-builderbase.min.js"></script>
+    <script src="./file/jscex-async.min.js"></script>
+    <script src="./file/jscex-async-powerpack.min.js"></script>
+    <script src="./file/functions.js"></script>
+    <script src="./file/love.js"></script>
     
     <style>
-        /* [Your original CSS styles are here, unchanged for brevity] */
-        /* ================================================= */
-        /* === GLOBAL & BODY STYLES === */
-        /* ================================================= */
+        /* General body styling for context, if needed from default.css */
         body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #1a1a2e; 
-            font-family: Arial, sans-serif;
-        }
-        
-        /* A simple style for the back link */
-        .back-link {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            color: #00FFFF;
-            text-decoration: none;
-            font-size: 18px;
-            padding: 10px;
-            border: 1px solid #00FFFF;
-            border-radius: 5px;
-            z-index: 20;
-            transition: background-color 0.3s;
-        }
-        .back-link:hover {
-            background-color: rgba(0, 255, 255, 0.1);
+            overflow: hidden; /* Prevent scrollbars from popping up due to heart particles */
+            background-color: #000; /* Assuming a dark background from default.css */
         }
 
-        /* ... (rest of the original styles) ... */
+        #myAudio {
+            /* display: none; /* Hide the audio player visuals */
+        }
+
+        /* Styling for the surprise button's outer div */
+        .surprise-container {
+            position: fixed;
+            bottom: 40px; /* Slightly higher to give hearts room to float up */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            perspective: 1000px; /* For potential 3D effects on hearts */
+        }
+
+        .myBtn {
+            font-size: 25px !important;
+            padding: 15px 30px; /* Slightly larger padding */
+            border: none; /* Remove default border */
+            border-radius: 50px; /* Make it more pill-shaped */
+            text-decoration: none;
+            color: #fff; /* White text */
+            background-image: linear-gradient(45deg, #ff6b6b, #ffe66d); /* Vibrant gradient */
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.7); /* Soft glow */
+            transition: all 0.4s ease-in-out; /* Smoother transitions */
+            font-family: 'Comic Sans MS', cursive, sans-serif; /* A bit playful for a birthday */
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3); /* Subtle text shadow */
+            cursor: pointer;
+            position: relative; /* Needed for pseudo-elements or absolute children */
+            overflow: hidden; /* Clip hearts if they start inside the button too much */
+        }
+        
+        .myBtn:hover {
+            transform: scale(1.05); /* Slightly enlarge on hover */
+            box-shadow: 0 0 30px rgba(255, 107, 107, 1); /* More intense glow */
+            background-image: linear-gradient(45deg, #ffe66d, #ff6b6b); /* Reverse gradient on hover */
+        }
+
+        /* Pulse animation for the button */
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 107, 107, 0.7); }
+            50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(255, 107, 107, 1); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 107, 107, 0.7); }
+        }
+        .myBtn {
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        /* Styles for the individual heart particles */
+        .heart-particle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #ff6b6b; /* Red heart */
+            transform: rotate(-45deg); /* Make it heart-shaped */
+            opacity: 0; /* Start invisible */
+            pointer-events: none; /* Don't interfere with clicks */
+            animation: floatAndFade 3s ease-out forwards;
+        }
+        .heart-particle::before,
+        .heart-particle::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #ff6b6b;
+            border-radius: 50%;
+        }
+        .heart-particle::before {
+            top: -10px;
+            left: 0;
+        }
+        .heart-particle::after {
+            left: 10px;
+            top: 0;
+        }
+
+        @keyframes floatAndFade {
+            0% {
+                transform: translate(0, 0) rotate(-45deg) scale(0);
+                opacity: 0;
+            }
+            10% {
+                transform: translate(0, 0) rotate(-45deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--translateX, 0), var(--translateY, -200px)) rotate(calc(-45deg + var(--rotate, 0deg))) scale(var(--scale, 0.5));
+                opacity: 0;
+            }
+        }
+
+        /* Error message styling */
+        #error {
+            color: white;
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(255, 0, 0, 0.5);
+            margin: 20px;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
-    <a href="birthday.html" class="back-link">
-        ⬅️ Back to Birthday Wish
-    </a>
+    <div id="main">
+        <div id="error" style="display:none;">Please use a modern browser to view this.</div>
 
-    <a href="#" 
-       target="_blank"
-       class="order-now-btn wow zoomInUp"
-       data-wow-duration="1.5s"
-       data-wow-delay="1s"
-       id="orderNowButton"> Order Now
-    </a>
+        <audio id="myAudio" loop>
+            <source src="Happy_Birthday_Song_Remix_For_Your_Special_Day_💎_Happy_Birthday_To_You!!!(256k).mp3" type="audio/mp3">
+            Your browser does not support the audio element.
+        </audio>
+        
+        <div id="wrap">
+            <div id="text">
+                <div id="code">
+                    <span class="say">Happy Birthday Dumbo 💖</span><br>
+                    
+                </div>
+            </div>
+            
+            <div id="clock-box">
+                <span id="clock">577 days 0 hours 0 minutes 0 seconds</span>
+            </div>
+            
+            <canvas id="canvas" width="1100" height="680"></canvas>
+        </div>
+    </div>
 
-    <div id="heart-container"></div>
-    
+    <div class="surprise-container">
+        <a href="https://happy-birathay-dumbo.vercel.app/" target="_blank" class="myBtn" id="surpriseButton">
+            Click here for Surprise
+        </a>
+    </div>
+
     <script>
-    // ... (Your original JavaScript remains mostly unchanged) ...
+    // ... (Your original Jscex/animation script remains mostly unchanged) ...
+    (function() {
+        var canvas = $('#canvas');
+        
+        if (!canvas[0].getContext) {
+            $("#error").show();
+            return false;
+        }
+
+        var width = canvas.width();
+        var height = canvas.height();        
+        canvas.attr("width", width);
+        canvas.attr("height", height);
+
+        var opts = {
+             seed: {
+                x: width / 2 - 20,
+                color: "rgb(190, 26, 37)",
+                scale: 2
+            },
+            branch: [
+                [535, 680, 570, 250, 500, 200, 30, 100, [
+                    [540, 500, 455, 417, 340, 400, 13, 100, [
+                        [450, 435, 434, 430, 394, 395, 2, 40]
+                    ]],
+                    [550, 445, 600, 356, 680, 345, 12, 100, [
+                        [578, 400, 648, 409, 661, 426, 3, 80]
+                    ]],
+                    [539, 281, 537, 248, 534, 217, 3, 40],
+                    [546, 397, 413, 247, 328, 244, 9, 80, [
+                        [427, 286, 383, 253, 371, 205, 2, 40],
+                        [498, 345, 435, 315, 395, 330, 4, 60]
+                    ]],
+                    [546, 357, 608, 252, 678, 221, 6, 100, [
+                        [590, 293, 646, 277, 648, 271, 2, 80]
+                    ]]
+                ]] 
+            ],
+            bloom: {
+                num: 700,
+                width: 1080,
+                height: 650,
+            },
+            footer: {
+                width: 1200,
+                height: 5,
+                speed: 10,
+            }
+        }
+
+        var tree = new Tree(canvas[0], width, height, opts);
+        var seed = tree.seed;
+        var foot = tree.footer;
+        var hold = 1;
+        
+        var audio = document.getElementById("myAudio");
+
+        canvas.click(function(e) {
+            audio.play().catch(error => {
+                console.error("Audio playback failed:", error);
+            });
+            
+            var offset = canvas.offset(), x, y;
+            x = e.pageX - offset.left;
+            y = e.pageY - offset.top;
+            if (seed.hover(x, y)) {
+                hold = 0; 
+                canvas.unbind("click");
+                canvas.unbind("mousemove");
+                canvas.removeClass('hand');
+            }		
+        }).mousemove(function(e) {
+            var offset = canvas.offset(), x, y;
+            x = e.pageX - offset.left;
+            y = e.pageY - offset.top;
+            canvas.toggleClass('hand', seed.hover(x, y));
+        });
+
+        var seedAnimate = eval(Jscex.compile("async", function () {
+            seed.draw();
+            while (hold) {
+                $await(Jscex.Async.sleep(10));
+            }
+            while (seed.canScale()) {
+                seed.scale(0.95);
+                $await(Jscex.Async.sleep(10));
+            }
+            while (seed.canMove()) {
+                seed.move(0, 2);
+                foot.draw();
+                $await(Jscex.Async.sleep(10));
+            }
+        }));
+
+        var growAnimate = eval(Jscex.compile("async", function () {
+            do {
+                tree.grow();
+                $await(Jscex.Async.sleep(10));
+            } while (tree.canGrow());
+        }));
+
+        var flowAnimate = eval(Jscex.compile("async", function () {
+            do {
+                tree.flower(2);
+                $await(Jscex.Async.sleep(10));
+            } while (tree.canFlower());
+        }));
+
+        var moveAnimate = eval(Jscex.compile("async", function () {
+            tree.snapshot("p1", 240, 0, 610, 680);
+            while (tree.move("p1", 500, 0)) {
+                foot.draw();
+                $await(Jscex.Async.sleep(10));
+            }
+            foot.draw();
+            tree.snapshot("p2", 500, 0, 610, 680);
+
+            canvas.parent().css("background", "url(" + tree.toDataURL('image/png') + ")");
+            canvas.css("background", "#ffe");
+            $await(Jscex.Async.sleep(300));
+            canvas.css("background", "none");
+        }));
+
+        var textAnimate = eval(Jscex.compile("async", function () {
+            $("#code").show().typewriter();
+        }));
+	    
+        var runAsync = eval(Jscex.compile("async", function () {
+            $await(seedAnimate());
+            $await(growAnimate());
+            $await(flowAnimate());
+            $await(moveAnimate());
+            textAnimate().start();
+        }));
+
+        runAsync().start();
+    })();
+
+    // New JavaScript for heart animation
+    $(document).ready(function() {
+        const $button = $('#surpriseButton');
+
+        // Function to create and animate a single heart particle
+        function createHeartParticle() {
+            const $heart = $('<div class="heart-particle"></div>');
+            
+            // Get button position and size
+            const buttonOffset = $button.offset();
+            const buttonWidth = $button.outerWidth();
+            const buttonHeight = $button.outerHeight();
+
+            // Position the heart to start roughly from the button's center
+            const startX = buttonOffset.left + buttonWidth / 2 - 10; // -10 for half heart width
+            const startY = buttonOffset.top + buttonHeight / 2 - 10; // -10 for half heart height
+
+            // Randomize trajectory and size
+            const translateX = (Math.random() - 0.5) * 200; // -100 to 100px horizontal
+            const translateY = -(Math.random() * 150 + 150); // -150 to -300px vertical (always upwards)
+            const rotation = (Math.random() - 0.5) * 90; // -45 to 45 degrees
+            const scale = Math.random() * 0.7 + 0.3; // 0.3 to 1.0
+
+            $heart.css({
+                left: startX + 'px',
+                top: startY + 'px',
+                '--translateX': translateX + 'px',
+                '--translateY': translateY + 'px',
+                '--rotate': rotation + 'deg',
+                '--scale': scale
+            });
+
+            $('body').append($heart);
+
+            // Remove the heart after its animation completes
+            $heart.one('animationend', function() {
+                $(this).remove();
+            });
+        }
+
+        // Generate hearts when the mouse hovers over the button
+        let heartInterval;
+        $button.on('mouseenter', function() {
+            heartInterval = setInterval(createHeartParticle, 100); // Create a heart every 100ms
+        }).on('mouseleave', function() {
+            clearInterval(heartInterval); // Stop creating hearts when mouse leaves
+        });
+
+        // Also generate some hearts on click, for a quick burst
+        $button.on('click', function() {
+            for (let i = 0; i < 10; i++) { // Generate 10 hearts on click
+                setTimeout(createHeartParticle, i * 50); // Stagger them slightly
+            }
+        });
+    });
+
     </script>
 </body>
 </html>
