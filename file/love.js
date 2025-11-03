@@ -1,4 +1,4 @@
-﻿(function(window){
+(function(window){
 
     function random(min, max) {
         return min + Math.floor(Math.random() * (max - min + 1));
@@ -11,6 +11,8 @@
         return p1.add(p2).add(p3);
     }  
 
+    // NOTE: inheart function is kept for flower placement logic, 
+    // even though the seed is a star.
     function inheart(x, y, r) {
         
         var z = ((x / r) * (x / r) + (y / r) * (y / r) - 1) * ((x / r) * (x / r) + (y / r) * (y / r) - 1) * ((x / r) * (x / r) + (y / r) * (y / r) - 1) - (x / r) * (x / r) * (y / r) * (y / r) * (y / r);
@@ -51,25 +53,8 @@
         }
     }
 
-    Heart = function() {
-        // x = 16 sin^3 t
-        // y = 13 cos t - 5 cos 2t - 2 cos 3t - cos 4t
-        // http://www.wolframalpha.com/input/?i=x+%3D+16+sin%5E3+t%2C+y+%3D+(13+cos+t+-+5+cos+2t+-+2+cos+3t+-+cos+4t)
-        var points = [], x, y, t;
-        for (var i = 10; i < 30; i += 0.2) {
-            t = i / Math.PI;
-            x = 16 * Math.pow(Math.sin(t), 3);
-            y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
-            points.push(new Point(x, y));
-        }
-        this.points = points;
-        this.length = points.length;
-    }
-    Heart.prototype = {
-        get: function(i, scale) {
-            return this.points[i].mul(scale || 1);
-        }
-    }
+    // NOTE: Original Heart function definition is removed (Lines 46-57 in your original code)
+    // as it is no longer used for the seed.
 
     Seed = function(tree, point, scale, color) {
         this.tree = tree;
@@ -80,8 +65,8 @@
         this.heart = {
             point  : point,
             scale  : scale,
-            color  : color,
-            figure : new Heart(),
+            color  : color
+            // NOTE: Removed figure : new Heart()
         }
 
         this.cirle = {
@@ -91,9 +76,11 @@
             radius : 5,
         }
     }
+    
+    // --- SEED PROTOTYPE START ---
     Seed.prototype = {
         draw: function() {
-            this.drawHeart();
+            this.drawStar(); // CHANGED: Calls drawStar instead of drawHeart
             this.drawText();
         },
         addPosition: function(x, y) {
@@ -116,26 +103,34 @@
         scale: function(scale) {
             this.clear();
             this.drawCirle();
-            this.drawHeart();
+            this.drawStar(); // CHANGED: Calls drawStar instead of drawHeart
             this.setHeartScale(scale);
         },
-        drawHeart: function() {
+        
+        // --- NEW/REPLACED FUNCTION: drawStar (Replaces drawHeart) ---
+        drawStar: function() {
             var ctx = this.tree.ctx, heart = this.heart;
             var point = heart.point, color = heart.color, 
                 scale = heart.scale;
+                
             ctx.save();
-            ctx.fillStyle = color;
             ctx.translate(point.x, point.y);
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            for (var i = 0; i < heart.figure.length; i++) {
-                var p = heart.figure.get(i, scale);
-                ctx.lineTo(p.x, -p.y);
-            }
-            ctx.closePath();
-            ctx.fill();
+
+            // Render the 5-pointed star
+            this.drawStarFigure(
+                ctx, 
+                0,                 // Center X
+                0,                 // Center Y
+                5,                 // 5 points
+                scale * 12,        // Outer radius (size)
+                scale * 5,         // Inner radius (point depth)
+                color
+            );
+
             ctx.restore();
         },
+        // --- END drawStar ---
+        
         drawCirle: function() {
             var ctx = this.tree.ctx, cirle = this.cirle;
             var point = cirle.point, color = cirle.color, 
@@ -182,8 +177,39 @@
             var ctx = this.tree.ctx;
             var pixel = ctx.getImageData(x, y, 1, 1);
             return pixel.data[3] == 255
+        },
+        
+        // --- NEW HELPER FUNCTION: drawStarFigure ---
+        drawStarFigure: function(ctx, cx, cy, spikes, outerRadius, innerRadius, color) {
+            var rot = Math.PI / 2 * 3;
+            var x = cx;
+            var y = cy;
+            var step = Math.PI / spikes;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - outerRadius);
+            for (var i = 0; i < spikes; i++) {
+                // Outer point
+                x = cx + Math.cos(rot) * outerRadius;
+                y = cy + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                // Inner point
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.lineTo(cx, cy - outerRadius);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
         }
+        // --- END drawStarFigure ---
     }
+    // --- SEED PROTOTYPE END ---
+
 
     Footer = function(tree, width, height, speed) {
         this.tree = tree;
@@ -263,7 +289,9 @@
                 num = bloom.num || 500, 
                 width = bloom.width || this.width,
                 height = bloom.height || this.height,
-                figure = this.seed.heart.figure;
+                // NOTE: The figure is still defined by the Heart geometry 
+                // for the *placement* of the blooms on the tree.
+                figure = this.seed.heart.figure; 
             var r = 240, x, y;
             for (var i = 0; i < num; i++) {
                 cache.push(this.createBloom(width, height, r, figure));
